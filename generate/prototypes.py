@@ -2,19 +2,19 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
-import anthropic
+from openai import OpenAI
 
-_client: anthropic.Anthropic | None = None
+_client: OpenAI | None = None
 
 
-def _get_client() -> anthropic.Anthropic:
+def _get_client() -> OpenAI:
     global _client
     if _client is None:
-        _client = anthropic.Anthropic()
+        _client = OpenAI()
     return _client
 
 
-def generate_prototypes(word: str, n: int = 4, model: str = "claude-sonnet-4-6") -> list[str]:
+def generate_prototypes(word: str, n: int = 4, model: str = "gpt-4o") -> list[str]:
     prompt = (
         f'Generate {n} words or short phrases that represent the most prototypical examples of the concept "{word}".\n\n'
         f'These should be the clearest, most canonical instances — the first things that come to mind when someone thinks of a "{word}".\n\n'
@@ -23,12 +23,12 @@ def generate_prototypes(word: str, n: int = 4, model: str = "claude-sonnet-4-6")
         "- No numbering, no explanations, no extra commentary\n"
         "- Prefer concrete, specific examples over abstract ones"
     )
-    message = _get_client().messages.create(
+    response = _get_client().chat.completions.create(
         model=model,
         max_tokens=256,
         messages=[{"role": "user", "content": prompt}],
     )
-    lines = [s.strip() for s in message.content[0].text.strip().splitlines() if s.strip()]
+    lines = [s.strip() for s in response.choices[0].message.content.strip().splitlines() if s.strip()]
     return lines[:n]
 
 

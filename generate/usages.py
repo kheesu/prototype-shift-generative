@@ -2,19 +2,19 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
-import anthropic
+from openai import OpenAI
 
-_client: anthropic.Anthropic | None = None
+_client: OpenAI | None = None
 
 
-def _get_client() -> anthropic.Anthropic:
+def _get_client() -> OpenAI:
     global _client
     if _client is None:
-        _client = anthropic.Anthropic()
+        _client = OpenAI()
     return _client
 
 
-def generate_usages(word: str, n: int = 10, model: str = "claude-sonnet-4-6") -> list[str]:
+def generate_usages(word: str, n: int = 10, model: str = "gpt-4o") -> list[str]:
     prompt = (
         f'Generate {n} diverse example sentences that use the word "{word}" naturally.\n\n'
         "Requirements:\n"
@@ -23,12 +23,12 @@ def generate_usages(word: str, n: int = 10, model: str = "claude-sonnet-4-6") ->
         "- Each sentence should feel authentic, not forced\n"
         "- Return ONLY the sentences, one per line, no numbering or extra commentary"
     )
-    message = _get_client().messages.create(
+    response = _get_client().chat.completions.create(
         model=model,
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
-    lines = [s.strip() for s in message.content[0].text.strip().splitlines() if s.strip()]
+    lines = [s.strip() for s in response.choices[0].message.content.strip().splitlines() if s.strip()]
     return lines[:n]
 
 

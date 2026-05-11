@@ -8,7 +8,7 @@ OUTPUTS_DIR = Path("outputs")
 USAGES_DIR = OUTPUTS_DIR / "usages"
 PROTOTYPES_DIR = OUTPUTS_DIR / "prototypes"
 
-DEFAULT_TEXT_MODEL = "claude-sonnet-4-6"
+DEFAULT_TEXT_MODEL = "gpt-4o"
 DEFAULT_N_USAGES = 10
 DEFAULT_N_PROTOTYPES = 4
 
