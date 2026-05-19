@@ -1,6 +1,9 @@
 import argparse
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from generate.prototypes import generate_prototypes, save_prototypes
 from generate.usages import generate_usages, save_usages
 
@@ -17,17 +20,18 @@ def run(args: argparse.Namespace) -> None:
     n_usages = args.n if args.n is not None else DEFAULT_N_USAGES
     n_prototypes = args.n if args.n is not None else DEFAULT_N_PROTOTYPES
     text_model = args.tm or DEFAULT_TEXT_MODEL
+    vllm_url = args.vllm_url
 
     for word in args.targets:
         if not args.prototypes_only:
             print(f"[usages] {word} ...")
-            usages = generate_usages(word, n=n_usages, model=text_model)
+            usages = generate_usages(word, n=n_usages, model=text_model, base_url=vllm_url)
             path = save_usages(word, usages, model=text_model, output_dir=USAGES_DIR)
             print(f"  -> {path} ({len(usages)} usages)")
 
         if not args.usages_only:
             print(f"[prototypes] {word} ...")
-            prototypes = generate_prototypes(word, n=n_prototypes, model=text_model)
+            prototypes = generate_prototypes(word, n=n_prototypes, model=text_model, base_url=vllm_url)
             path = save_prototypes(word, prototypes, model=text_model, output_dir=PROTOTYPES_DIR)
             print(f"  -> {path} ({len(prototypes)} prototypes)")
 
@@ -48,6 +52,10 @@ def main() -> None:
         help="Number of outputs per word (default: 10 for usages, 4 for prototypes)",
     )
     parser.add_argument("--tm", default=None, metavar="MODEL", help="Text model override")
+    parser.add_argument(
+        "--vllm-url", default=None, metavar="URL",
+        help="Base URL of a vLLM OpenAI-compatible server (e.g. http://localhost:8000/v1)",
+    )
     run(parser.parse_args())
 
 

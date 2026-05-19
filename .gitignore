@@ -5,3 +5,4 @@ outputs/usages/*.json
 outputs/prototypes/*/
 !outputs/usages/.gitkeep
 !outputs/prototypes/.gitkeep
+.env
