@@ -35,6 +35,38 @@ def generate_prototypes(word: str, n: int = 4, model: str = "gpt-4o", base_url: 
     return lines[:n]
 
 
+def generate_prototypes_persona(
+    word: str,
+    time_period: str,
+    n: int = 4,
+    model: str = "gpt-4o",
+    base_url: str | None = None,
+) -> list[str]:
+    system = (
+        f"You are a person living in {time_period}. "
+        "Think and respond from the perspective of someone from that era — "
+        "use vocabulary, concepts, and cultural references authentic to that time period."
+    )
+    prompt = (
+        f'Generate {n} words or short phrases that represent the most prototypical examples of the concept "{word}".\n\n'
+        f'These should be the clearest, most canonical instances — the first things that come to mind when someone of your time thinks of a "{word}".\n\n'
+        "Requirements:\n"
+        "- Return ONLY the prototype words/phrases, one per line\n"
+        "- No numbering, no explanations, no extra commentary\n"
+        "- Prefer concrete, specific examples over abstract ones"
+    )
+    response = _get_client(base_url).chat.completions.create(
+        model=model,
+        max_completion_tokens=256,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    lines = [s.strip() for s in response.choices[0].message.content.strip().splitlines() if s.strip()]
+    return lines[:n]
+
+
 def save_prototypes(word: str, prototypes: list[str], model: str, output_dir: Path) -> Path:
     word_dir = output_dir / word
     word_dir.mkdir(parents=True, exist_ok=True)
